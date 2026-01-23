@@ -1,0 +1,14 @@
+[
+  {
+    "level": "error",
+    "message": "DB failed",
+    "resourceId": "server-1",
+    "timestamp": "2025-01-23T12:00:00Z",
+    "traceId": "t-1",
+    "spanId": "s-1",
+    "commit": "c1",
+    "metadata": {
+      "host": "prod"
+    }
+  }
+]
