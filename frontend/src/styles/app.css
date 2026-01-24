@@ -1,0 +1,102 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Inter", system-ui, sans-serif;
+  background: #0f172a; /* slate-900 */
+  color: #e5e7eb;
+}
+
+.app {
+  max-width: 1100px;
+  margin: 40px auto;
+  padding: 20px;
+}
+
+h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: #f8fafc;
+}
+
+/* FILTER BAR */
+.filter-bar {
+  display: flex;
+  gap: 10px;
+  background: #020617;
+  padding: 12px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+.filter-bar input,
+.filter-bar select {
+  background: #020617;
+  border: 1px solid #1e293b;
+  color: #f8fafc;
+  padding: 8px 10px;
+  border-radius: 6px;
+  outline: none;
+}
+
+/* LOG LIST */
+.logs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* LOG CARD */
+.log-item {
+  background: #020617;
+  border-left: 5px solid gray;
+  padding: 14px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  transition: transform 0.15s ease;
+}
+
+.log-item:hover {
+  transform: translateY(-2px);
+}
+
+.log-item p {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.log-item small {
+  display: block;
+  margin-top: 4px;
+  color: #94a3b8;
+}
+
+/* LEVEL COLORS */
+.log-item.error { border-color: #ef4444; }
+.log-item.warn { border-color: #f59e0b; }
+.log-item.info { border-color: #3b82f6; }
+.log-item.debug { border-color: #6b7280; }
+
+/* PAGINATION */
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.pagination button {
+  background: #020617;
+  border: 1px solid #1e293b;
+  color: #f8fafc;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.pagination button:hover {
+  background: #1e293b;
+}

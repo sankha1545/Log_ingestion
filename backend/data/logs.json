@@ -10,5 +10,29 @@
     "metadata": {
       "host": "prod"
     }
+  },
+  {
+    "level": "info",
+    "message": "Live log test",
+    "resourceId": "server-2",
+    "timestamp": "2025-01-24T10:00:00Z",
+    "traceId": "t9",
+    "spanId": "s9",
+    "commit": "c9",
+    "metadata": {
+      "host": "prod"
+    }
+  },
+  {
+    "level": "error",
+    "message": "Database connection failed",
+    "resourceId": "server-1234",
+    "timestamp": "2025-01-24T12:00:00Z",
+    "traceId": "trace-001",
+    "spanId": "span-001",
+    "commit": "abc123",
+    "metadata": {
+      "env": "prod"
+    }
   }
 ]

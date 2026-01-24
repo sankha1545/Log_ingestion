@@ -15,6 +15,7 @@
     "express": "^5.2.1",
     "fs-extra": "^11.3.3",
     "proper-lockfile": "^4.1.2",
+    "socket.io": "^4.8.3",
     "zod": "^3.25.76"
   }
 }
