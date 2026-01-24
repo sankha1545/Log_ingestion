@@ -45,6 +45,7 @@ async function postLogs(req, res) {
 
     await release();
 
+    // real-time emit
     if (req.io) req.io.emit("new_log", log);
 
     return res.status(201).json(log);
@@ -67,7 +68,6 @@ async function getLogs(req, res) {
 
     let results = logs;
 
-    // Accept both sets of names: frontend uses 'search', 'from', 'to'
     const {
       level,
       message,
@@ -84,51 +84,63 @@ async function getLogs(req, res) {
     } = req.query;
 
     const msgFilter = search || message;
-    const start = from || timestamp_start;
-    const end = to || timestamp_end;
+    const startRaw = from || timestamp_start;
+    const endRaw = to || timestamp_end;
 
-    // Level filter (allow comma-separated multiple levels)
+    /* -------- LEVEL FILTER -------- */
     if (level) {
       const levels = String(level).split(",").map((s) => s.trim());
       results = results.filter((l) => levels.includes(l.level));
     }
 
-    // resourceId filter (case-insensitive substring match)
+    /* -------- RESOURCE ID FILTER -------- */
     if (resourceId) {
       const r = String(resourceId).toLowerCase();
       results = results.filter((l) =>
-        (l.resourceId || "").toLowerCase().includes(r)
+        String(l.resourceId || "").toLowerCase().includes(r)
       );
     }
 
-    // message search: respect caseSensitive flag
+    /* -------- MESSAGE SEARCH -------- */
     if (msgFilter) {
-      // escape regex special chars
       const safe = String(msgFilter).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-      const flags = caseSensitive && (caseSensitive === "1" || caseSensitive === "true") ? "" : "i";
+      const flags =
+        caseSensitive === "1" || caseSensitive === "true" ? "" : "i";
       const regex = new RegExp(safe, flags);
-      results = results.filter((l) => regex.test(String(l.message || "")));
+
+      results = results.filter((l) =>
+        regex.test(String(l.message || ""))
+      );
     }
 
     if (traceId) results = results.filter((l) => l.traceId === traceId);
     if (spanId) results = results.filter((l) => l.spanId === spanId);
     if (commit) results = results.filter((l) => l.commit === commit);
 
-    // time range: parse start/end as Date; support ISO or local-ISO converted by frontend
-    if (start || end) {
-      const startTime = start ? new Date(start).getTime() : null;
-      const endTime = end ? new Date(end).getTime() : null;
+    /* -------- TIME RANGE FILTER (FIXED) -------- */
+    if (startRaw || endRaw) {
+      const startDecoded = startRaw
+        ? decodeURIComponent(startRaw)
+        : null;
+      const endDecoded = endRaw
+        ? decodeURIComponent(endRaw)
+        : null;
+
+      const startTime = startDecoded ? Date.parse(startDecoded) : null;
+      const endTime = endDecoded ? Date.parse(endDecoded) : null;
 
       results = results.filter((l) => {
-        const t = new Date(l.timestamp).getTime();
-        if (Number.isNaN(t)) return false; // invalid timestamp in log -> skip
+        const t = Date.parse(l.timestamp);
+        if (Number.isNaN(t)) return false;
+
         if (startTime && t < startTime) return false;
         if (endTime && t > endTime) return false;
+
         return true;
       });
     }
 
-    // newest first
+    /* -------- SORT NEWEST FIRST -------- */
     results.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
     return res.json(results);

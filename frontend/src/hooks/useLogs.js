@@ -3,6 +3,7 @@ import { fetchLogs } from "../api/logsApi";
 import { socket } from "../services/socket";
 
 function matchesFilters(log, filters = {}) {
+  console.log("FETCHING LOGS WITH:", filters);
   // Ensure timestamps parsed as numbers
   const logTime = new Date(log.timestamp).getTime();
   if (Number.isNaN(logTime)) return false;
@@ -35,7 +36,9 @@ function matchesFilters(log, filters = {}) {
   }
 
   return true;
+  
 }
+
 
 export function useLogs(filters = {}) {
   const [logs, setLogs] = useState([]);
@@ -43,7 +46,8 @@ export function useLogs(filters = {}) {
   const prevIds = useRef(new Set());
 
   // stable key for debounce/effects
-  const filterKey = useMemo(() => JSON.stringify(filters), [filters]);
+ const filterKey = useMemo(() => JSON.stringify({ ...filters }), [filters]);
+
 
   /* -------- REST FETCH (debounced) -------- */
   useEffect(() => {

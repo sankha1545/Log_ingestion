@@ -27,7 +27,7 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-      <header className="flex justify-between items-center">
+      <header className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold">Logs</h1>
           <p className="text-sm text-slate-500">
@@ -36,11 +36,15 @@ export default function Dashboard() {
         </div>
       </header>
 
-      <section className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-xl p-4 shadow">
-        <FilterBar filters={filters} setFilters={setFilters} />
+      <section className="p-4 bg-white border shadow dark:bg-slate-900 border-slate-300 dark:border-slate-800 rounded-xl">
+        <FilterBar
+  filters={filters}
+  setFilters={(f) => setFilters({ ...f })}
+/>
+
       </section>
 
-      <section className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-xl shadow overflow-hidden text-slate-900 dark:text-slate-100">
+      <section className="overflow-hidden bg-white border shadow dark:bg-slate-900 border-slate-300 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100">
         <LogsList
           logs={logs}
           loading={loading}

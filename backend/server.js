@@ -3,10 +3,13 @@ const cors = require("cors");
 const http = require("http");
 const { Server } = require("socket.io");
 
-const { postLogs, getLogs } = require("./routes/logs");
-
 const app = express();
+
+// 🔴 DISABLE ETAG BEFORE ANY MIDDLEWARE
+app.disable("etag");
+
 const server = http.createServer(app);
+const { postLogs, getLogs } = require("./routes/logs");
 const { execCommand } = require("./routes/cli");
 
 app.post("/cli/exec", execCommand);
@@ -25,6 +28,14 @@ app.use((req, res, next) => {
   next();
 });
 
+// ------------------ CACHE KILLER ------------------
+app.use((req, res, next) => {
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, private");
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
+  next();
+});
+
 // ------------------ MIDDLEWARE ------------------
 app.use(cors());
 app.use(express.json());
@@ -36,7 +47,6 @@ app.get("/logs", getLogs);
 // ------------------ SOCKET CONNECTION ------------------
 io.on("connection", (socket) => {
   console.log("🔌 Client connected:", socket.id);
-
   socket.on("disconnect", () => {
     console.log("❌ Client disconnected:", socket.id);
   });

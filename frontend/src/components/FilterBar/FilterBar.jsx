@@ -44,12 +44,12 @@ export default function FilterBar({ filters, setFilters }) {
   }, [local]);
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-3 items-end">
+    <div className="grid items-end grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-7">
       {/* Search */}
       <div>
-        <label className="block text-xs mb-1 text-slate-500">Search</label>
+        <label className="block mb-1 text-xs text-slate-500">Search</label>
         <input
-          className="w-full border rounded-lg px-3 py-2 text-sm text-black"
+          className="w-full px-3 py-2 text-sm text-black border rounded-lg"
           placeholder="Exact message text..."
           value={local.search}
           onChange={(e) => setLocal({ ...local, search: e.target.value })}
@@ -58,9 +58,9 @@ export default function FilterBar({ filters, setFilters }) {
 
       {/* Resource ID */}
       <div>
-        <label className="block text-xs mb-1 text-slate-500 ">Resource ID</label>
+        <label className="block mb-1 text-xs text-slate-500 ">Resource ID</label>
         <input
-          className="w-full border rounded-lg px-3 py-2 text-sm text-black"
+          className="w-full px-3 py-2 text-sm text-black border rounded-lg"
           placeholder="server-1234"
           value={local.resourceId}
           onChange={(e) => setLocal({ ...local, resourceId: e.target.value })}
@@ -69,9 +69,9 @@ export default function FilterBar({ filters, setFilters }) {
 
       {/* Level */}
       <div>
-        <label className="block text-xs mb-1 text-slate-500">Level</label>
+        <label className="block mb-1 text-xs text-slate-500">Level</label>
         <select
-          className="w-full border rounded-lg px-3 py-2 text-sm text-black"
+          className="w-full px-3 py-2 text-sm text-black border rounded-lg"
           value={local.level}
           onChange={(e) => setLocal({ ...local, level: e.target.value })}
         >
@@ -85,10 +85,10 @@ export default function FilterBar({ filters, setFilters }) {
 
       {/* From */}
       <div>
-        <label className="block text-xs mb-1 text-slate-500 ">From</label>
+        <label className="block mb-1 text-xs text-slate-500 ">From</label>
         <input
           type="datetime-local"
-          className="w-full border rounded-lg px-3 py-2 text-sm text-black"
+          className="w-full px-3 py-2 text-sm text-black border rounded-lg"
           value={local.fromLocal}
           onChange={(e) => setLocal({ ...local, fromLocal: e.target.value })}
         />
@@ -96,10 +96,10 @@ export default function FilterBar({ filters, setFilters }) {
 
       {/* To */}
       <div>
-        <label className="block text-xs mb-1 text-slate-500">To</label>
+        <label className="block mb-1 text-xs text-slate-500">To</label>
         <input
           type="datetime-local"
-          className="w-full border rounded-lg px-3 py-2 text-sm text-black"
+          className="w-full px-3 py-2 text-sm text-black border rounded-lg"
           value={local.toLocal}
           onChange={(e) => setLocal({ ...local, toLocal: e.target.value })}
         />
@@ -128,7 +128,7 @@ export default function FilterBar({ filters, setFilters }) {
             caseSensitive: false,
           })
         }
-        className="h-10 rounded-lg bg-indigo-600"
+        className="h-10 bg-indigo-600 rounded-lg"
       >
         Clear
       </button>

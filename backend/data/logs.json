@@ -110,5 +110,17 @@
     "spanId": "cli",
     "commit": "web",
     "metadata": {}
+  },
+  {
+    "level": "warn",
+    "message": "High memory usage detected",
+    "resourceId": "server-22",
+    "timestamp": "2025-01-24T15:10:00Z",
+    "traceId": "trace-warn-1",
+    "spanId": "span-warn-1",
+    "commit": "commit-warn-1",
+    "metadata": {
+      "memory": "92%"
+    }
   }
 ]

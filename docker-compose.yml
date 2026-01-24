@@ -1,0 +1,22 @@
+version: "3.9"
+
+services:
+  backend:
+    build: ./backend
+    container_name: log-backend
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./backend/data:/app/data
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    container_name: log-frontend
+    ports:
+      - "5173:80"
+    environment:
+      - VITE_API_URL=http://backend:3001
+    depends_on:
+      - backend
+    restart: unless-stopped
