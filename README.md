@@ -16,6 +16,7 @@ It allows developers to send logs from any service, persist them in a JSON file,
 
 - [Features](#features)
 - [UI Preview](#ui-preview)
+- [Architecture Diagram](#architecture-diagram)
 - [Learn the Technologies Used](#learn-the-technologies-used)
 - [Monorepo Structure](#monorepo-structure)
 - [Project Dependencies](#project-dependencies)
@@ -71,16 +72,23 @@ Below are real screenshots from the LogScope interface, showcasing the dashboard
 
 ### 📊 Dashboard
 The main control center where logs are streamed, filtered, and inspected in real time.
-![Dashboard](images/dashboard.png)
+![Dashboard](images/dashboard-light.png)
+![Dashboard](images/dashboard-dark.png)
+
 
 ### 📈 Analytics View
 Provides visual insights such as log counts by level and real-time trend analysis.
-![Analytics](images/analytics.png)
+![Analytics](images/analytics-light.png)
+![Analytics](images/analytics-dark.png)
 
 ### 🖥️ Terminal UI (Future Scope)
 An experimental command-based interface that will allow users to query and analyze logs using CLI-style commands.
 ![Terminal UI](images/terminal.png)
 
+
+<a id="architecture-diagram">
+## Architecture Diagram
+![Terminal UI](images/architecture-diagram.png)
 
 
 <a id="learn-the-technologies-used"></a>
@@ -471,7 +479,7 @@ To make the terminal safe, powerful, and extensible, LogScope will use a virtual
 
 This requires a sandboxed Virtual Machine environment.
 
-## 🏗️ Terminal Architecture (Proposed)
+### 🏗️ Terminal Architecture (Proposed)
 ```
 [ Web Terminal (React) ]
         ↓
@@ -486,7 +494,7 @@ This requires a sandboxed Virtual Machine environment.
 [ Log Engine + Analytics Core ]
 
 ```
-## 🔐 Why a Virtual Machine?
+### 🔐 Why a Virtual Machine?
 A VM or sandbox is required to:
 
 - Prevent OS-level command execution
@@ -519,7 +527,111 @@ A VM or sandbox is required to:
 - [ ] Plugin support  
 
 -----
-This will transform LogScope from a UI dashboard into a **developer observability platform with a built-in command engine.**
+## 🔐 Future Scope: Authentication & Enterprise SaaS Platform
+
+To make LogScope a **multi-tenant, enterprise-ready SaaS**, the platform will introduce:
+
+- Secure user authentication
+- Organization & team management
+- Role-based access control (RBAC)
+- Audit logs and usage analytics
+- API tokens for log ingestion
+
+---
+
+### 🏗️ Authentication & SaaS Architecture (Proposed)
+```
+[ Web App (React) ]
+↓
+[ Auth Gateway ]
+↓
+[ Identity Provider ]
+↓
+[ User & Org Service ]
+↓
+[ RBAC + Policy Engine ]
+↓
+[ Log Ingestion API ]
+↓
+[ Tenant-Isolated Log Store ]
+↓
+[ Analytics + Dashboards ]
+
+```
+
+---
+
+### 🔑 Core Features (Planned)
+
+- Email & OAuth login (Google, GitHub)
+- Organization / Workspace system
+- Role-based permissions:
+  - Admin
+  - Developer
+  - Viewer
+- API keys per project
+- Secure session & JWT token handling
+- Rate limiting per tenant
+- Audit trail for user actions
+
+---
+
+### 🛠️ Technologies (Planned)
+
+| Layer              | Tool                         |
+|--------------------|------------------------------|
+| Auth UI            | React, Tailwind              |
+| Auth Backend       | Node.js, Express             |
+| Identity Provider  | JWT / OAuth / Auth0          |
+| Database           | PostgreSQL / Prisma          |
+| Session Security   | HttpOnly cookies, JWT        |
+| RBAC Engine        | Policy-based middleware      |
+| API Security       | API keys + rate limiting     |
+
+---
+
+### 🔄 SaaS User Flow
+
+```
+User → Login → Select Org → Access Logs
+↓
+RBAC Check
+↓
+Authorized APIs
+↓
+Tenant Log Store
+↓
+Analytics Dashboard
+
+```
+
+---
+
+### 🌐 Multi-Tenant Isolation Model
+
+| Level | Isolation |
+|-------|-----------|
+| Org   | Separate log namespaces |
+| Team  | Permission-based access |
+| User  | Role-specific controls  |
+
+---
+
+### 🚀 SaaS Roadmap
+
+- [ ] Login / Signup system  
+- [ ] Organization & workspace support  
+- [ ] RBAC policies  
+- [ ] API keys for log ingestion  
+- [ ] Billing & usage metering  
+- [ ] SSO (Google, GitHub)  
+- [ ] Audit logs  
+- [ ] Admin control panel  
+
+---
+
+This will transform LogScope into a **secure, multi-tenant, enterprise observability SaaS platform**.
+
 
 <a id="contributing"></a>
 ## 👥 Contributing
