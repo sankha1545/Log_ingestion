@@ -72,9 +72,10 @@ Below are real screenshots from the LogScope interface, showcasing the dashboard
 
 ### 📊 Dashboard
 The main control center where logs are streamed, filtered, and inspected in real time.
-**DARK MODE**
-![Dashboard](images/dashboard-light.png)
 **LIGHT MODE**
+
+![Dashboard](images/dashboard-light.png)
+**DARK MODE**
 ![Dashboard](images/dashboard-dark.png)
 
 
