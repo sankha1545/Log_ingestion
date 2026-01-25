@@ -72,13 +72,17 @@ Below are real screenshots from the LogScope interface, showcasing the dashboard
 
 ### 📊 Dashboard
 The main control center where logs are streamed, filtered, and inspected in real time.
+**DARK MODE**
 ![Dashboard](images/dashboard-light.png)
+**LIGHT MODE**
 ![Dashboard](images/dashboard-dark.png)
 
 
 ### 📈 Analytics View
 Provides visual insights such as log counts by level and real-time trend analysis.
+**DARK MODE**
 ![Analytics](images/analytics-light.png)
+**LIGHT MODE**
 ![Analytics](images/analytics-dark.png)
 
 ### 🖥️ Terminal UI (Future Scope)
