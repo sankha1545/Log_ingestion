@@ -16,7 +16,9 @@ It allows developers to send logs from any service, persist them in a JSON file,
 
 - [Features](#features)
 - [UI Preview](#ui-preview)
+- [Learn the Technologies Used](#learn-the-technologies-used)
 - [Monorepo Structure](#monorepo-structure)
+- [Project Dependencies](#project-dependencies)
 - [Installation & Setup](#installation)
 - [API Reference](#api-reference)
 - [Filtering Logic](#filtering-logic)
@@ -27,6 +29,7 @@ It allows developers to send logs from any service, persist them in a JSON file,
 - [Example Test](#example-test)
 - [Tech Stack](#tech-stack)
 - [Design Decisions](#design-decisions)
+- [Terminal UI (Future Scope)](#terminal-ui)
 - [Contributing](#contributing)
 - [Author](#author)
 
@@ -64,11 +67,84 @@ It allows developers to send logs from any service, persist them in a JSON file,
 <a id="ui-preview"></a>
 ## 📸 UI Preview
 
-Replace these with your screenshots:
+Below are real screenshots from the LogScope interface, showcasing the dashboard, analytics, and the upcoming terminal UI.
 
+### 📊 Dashboard
+The main control center where logs are streamed, filtered, and inspected in real time.
 ![Dashboard](images/dashboard.png)
-![Dashboard](images/analytics.png)
-![Dashboard](images/terminal.png)
+
+### 📈 Analytics View
+Provides visual insights such as log counts by level and real-time trend analysis.
+![Analytics](images/analytics.png)
+
+### 🖥️ Terminal UI (Future Scope)
+An experimental command-based interface that will allow users to query and analyze logs using CLI-style commands.
+![Terminal UI](images/terminal.png)
+
+
+
+<a id="learn-the-technologies-used"></a>
+## 📚 Learn the Technologies Used
+
+If you are new to any of the tools used in this project, you can explore their official documentation below:
+
+---
+
+### ⚛️ React
+> A JavaScript library for building user interfaces  
+🔗 https://react.dev/
+
+---
+
+### 🌐 Node.js
+> JavaScript runtime for building scalable backend services  
+🔗 https://nodejs.org/en/docs
+
+---
+
+### 🚀 Express.js
+> Minimal and flexible Node.js web framework  
+🔗 https://expressjs.com/
+
+---
+
+### 🔌 Socket.IO
+> Real-time bidirectional communication between client and server  
+🔗 https://socket.io/docs/v4/
+
+---
+
+### 📊 Recharts
+> Charting library for React  
+🔗 https://recharts.org/en-US/
+
+---
+
+### 🎨 Tailwind CSS
+> Utility-first CSS framework  
+🔗 https://tailwindcss.com/docs
+
+---
+
+### 🐳 Docker
+> Platform to build, run, and ship applications in containers  
+🔗 https://docs.docker.com/
+
+---
+
+### 🔁 GitHub Actions (CI/CD)
+> Automate build, test, and deployment pipelines  
+🔗 https://docs.github.com/en/actions
+
+---
+
+### 🗄️ Nginx
+> High-performance web server for static content  
+🔗 https://nginx.org/en/docs/
+
+---
+
+This section helps beginners quickly learn the stack used in **LogScope**.
 
 <a id="monorepo-structure"></a>
 ## 📁 Monorepo Structure
@@ -164,6 +240,57 @@ log-ingestion/
 │
 └── README.md
 ```
+<a id="project-dependencies"></a>
+## 📦 Project Dependencies
+
+This project uses modern libraries for real-time communication, UI, validation, and DevOps-ready workflows.
+
+---
+
+### 🎨 Frontend Dependencies
+
+| Package | Purpose |
+|--------|---------|
+| react | Core UI library |
+| react-dom | DOM renderer for React |
+| react-router-dom | Client-side routing |
+| framer-motion | Animations & transitions |
+| react-hot-toast | Toast notifications |
+| recharts | Analytics & data visualization |
+| socket.io-client | Real-time log streaming |
+| vite | Frontend build tool |
+| tailwindcss | Utility-first CSS framework |
+| postcss | CSS processing |
+| autoprefixer | Vendor prefixing |
+| eslint | Linting & code quality |
+
+---
+
+### 🧠 Backend Dependencies
+
+| Package | Purpose |
+|--------|---------|
+| express | REST API server |
+| cors | Cross-origin support |
+| fs-extra | File system utilities |
+| proper-lockfile | Atomic file locking |
+| socket.io | Real-time WebSocket server |
+| zod | Schema validation |
+
+---
+
+### 🛠 Dev & Build Tooling
+
+| Tool | Purpose |
+|------|---------|
+| vite | Fast dev & production builds |
+| eslint | Code linting |
+| tailwindcss | Styling framework |
+| postcss | CSS transformer |
+| GitHub Actions | CI/CD automation |
+| Docker | Containerization |
+| Nginx | Frontend static serving |
+
 <a id="installation"></a>
 ## ⚙️ Installation & Setup
 ### 1️⃣ Clone
@@ -181,6 +308,7 @@ cd logscope
 docker compose up --build
 
 ```
+
 <a id="api-reference"></a>
 ## 🔌 API Reference
 
@@ -311,7 +439,88 @@ curl -X POST http://localhost:3001/logs \
 - WebSockets → real-time observability
 
 - Monorepo → easier CI/CD and reuse
-  
+
+<a id="terminal-ui"></a>
+## 🖥️ Terminal UI (Experimental & Future Scope)
+
+LogScope includes an **experimental terminal-style interface** designed to behave like a real command-line log console — similar to tools found in **Grafana, Splunk, and Datadog**.
+
+This terminal will allow users to **type commands, run log queries, filter streams, and inspect analytics directly from a web-based shell**.
+
+---
+
+### 🎯 Goal
+
+Provide a **fully interactive, browser-based terminal** where users can:
+
+- Query logs using CLI commands  
+- Stream logs in real time  
+- Run analytics commands  
+- Navigate log history  
+- Export filtered results  
+
+Example:
+```bash
+logscope> level:error resource:server-1 last:10m
+logscope> stats by level
+logscope> export csv
+
+```
+## 🧠 Future Scope: Virtual Command Runtime
+To make the terminal safe, powerful, and extensible, LogScope will use a virtual execution layer instead of running commands directly on the host system.
+
+This requires a sandboxed Virtual Machine environment.
+
+## 🏗️ Terminal Architecture (Proposed)
+```
+[ Web Terminal (React) ]
+        ↓
+[ Command Parser ]
+        ↓
+[ Secure Command Router ]
+        ↓
+[ Virtual Execution Layer ]
+        ↓
+[ VM / Sandbox Runtime ]
+        ↓
+[ Log Engine + Analytics Core ]
+
+```
+## 🔐 Why a Virtual Machine?
+A VM or sandbox is required to:
+
+- Prevent OS-level command execution
+
+- Isolate user input
+
+- Allow safe scripting
+
+- Scale across environments
+
+- Support future plugins
+
+### 🛠️ Technologies (Planned)
+| Layer         | Tool                     |
+|---------------|--------------------------|
+| Terminal UI   | xterm.js, React          |
+| Command Parser| Node.js                  |
+| Runtime       | Docker VM / Firecracker |
+| Isolation     | Linux namespaces         |
+| Transport     | WebSockets               |
+| Security      | Policy-based execution  |
+
+---
+### 🚀 Roadmap
+
+- [x] UI shell prototype  
+- [ ] Command grammar  
+- [ ] Virtual runtime sandbox  
+- [ ] CLI analytics commands  
+- [ ] Plugin support  
+
+-----
+This will transform LogScope from a UI dashboard into a **developer observability platform with a built-in command engine.**
+
 <a id="contributing"></a>
 ## 👥 Contributing
 
