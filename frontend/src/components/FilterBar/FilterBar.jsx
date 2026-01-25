@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 
 export default function FilterBar({ filters, setFilters }) {
-  // Keep user-friendly local state for datetime inputs (datetime-local format)
   const [local, setLocal] = useState({
     search: filters.search || "",
     resourceId: filters.resourceId || "",
@@ -11,7 +10,7 @@ export default function FilterBar({ filters, setFilters }) {
     caseSensitive: !!filters.caseSensitive,
   });
 
-  // helper: convert ISO string to input-friendly (YYYY-MM-DDTHH:mm)
+  /* convert ISO → datetime-local */
   function localIsoToInput(iso) {
     try {
       const d = new Date(iso);
@@ -27,15 +26,20 @@ export default function FilterBar({ filters, setFilters }) {
     }
   }
 
-  // send normalized filters to parent whenever local changes
+  /* convert local datetime → true ISO (no timezone shift) */
+  function toLocalISO(dt) {
+    const d = new Date(dt);
+    return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString();
+  }
+
+  /* send filters upward */
   useEffect(() => {
     const out = {
       search: local.search || undefined,
       resourceId: local.resourceId || undefined,
       level: local.level || undefined,
-      // convert local input (YYYY-MM-DDTHH:mm) to ISO string (UTC)
-      from: local.fromLocal ? new Date(local.fromLocal).toISOString() : undefined,
-      to: local.toLocal ? new Date(local.toLocal).toISOString() : undefined,
+      from: local.fromLocal ? toLocalISO(local.fromLocal) : undefined,
+      to: local.toLocal ? toLocalISO(local.toLocal) : undefined,
       caseSensitive: local.caseSensitive || false,
     };
 
@@ -45,6 +49,7 @@ export default function FilterBar({ filters, setFilters }) {
 
   return (
     <div className="grid items-end grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-7">
+
       {/* Search */}
       <div>
         <label className="block mb-1 text-xs text-slate-500">Search</label>
@@ -58,7 +63,7 @@ export default function FilterBar({ filters, setFilters }) {
 
       {/* Resource ID */}
       <div>
-        <label className="block mb-1 text-xs text-slate-500 ">Resource ID</label>
+        <label className="block mb-1 text-xs text-slate-500">Resource ID</label>
         <input
           className="w-full px-3 py-2 text-sm text-black border rounded-lg"
           placeholder="server-1234"
@@ -85,7 +90,7 @@ export default function FilterBar({ filters, setFilters }) {
 
       {/* From */}
       <div>
-        <label className="block mb-1 text-xs text-slate-500 ">From</label>
+        <label className="block mb-1 text-xs text-slate-500">From</label>
         <input
           type="datetime-local"
           className="w-full px-3 py-2 text-sm text-black border rounded-lg"
@@ -113,7 +118,9 @@ export default function FilterBar({ filters, setFilters }) {
           checked={local.caseSensitive}
           onChange={(e) => setLocal({ ...local, caseSensitive: e.target.checked })}
         />
-        <label htmlFor="caseSensitive" className="text-sm text-slate-600">Case-sensitive search</label>
+        <label htmlFor="caseSensitive" className="text-sm text-slate-600">
+          Case-sensitive search
+        </label>
       </div>
 
       {/* Clear */}

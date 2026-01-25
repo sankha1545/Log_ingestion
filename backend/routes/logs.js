@@ -87,6 +87,10 @@ async function getLogs(req, res) {
     const startRaw = from || timestamp_start;
     const endRaw = to || timestamp_end;
 
+    console.log("====== DATE FILTER DEBUG ======");
+console.log("FROM RAW:", startRaw);
+console.log("TO RAW:", endRaw);
+
     /* -------- LEVEL FILTER -------- */
     if (level) {
       const levels = String(level).split(",").map((s) => s.trim());
@@ -118,27 +122,28 @@ async function getLogs(req, res) {
     if (commit) results = results.filter((l) => l.commit === commit);
 
     /* -------- TIME RANGE FILTER (FIXED) -------- */
-    if (startRaw || endRaw) {
-      const startDecoded = startRaw
-        ? decodeURIComponent(startRaw)
-        : null;
-      const endDecoded = endRaw
-        ? decodeURIComponent(endRaw)
-        : null;
+/* -------- TIME RANGE FILTER (FINAL FIX) -------- */
+if (startRaw || endRaw) {
+  const startTime = startRaw ? new Date(startRaw).getTime() : null;
+  const endTime = endRaw
+    ? new Date(endRaw).getTime() + 59_999
+    : null;
 
-      const startTime = startDecoded ? Date.parse(startDecoded) : null;
-      const endTime = endDecoded ? Date.parse(endDecoded) : null;
+  console.log("PARSED FROM:", startTime);
+  console.log("PARSED TO:", endTime);
 
-      results = results.filter((l) => {
-        const t = Date.parse(l.timestamp);
-        if (Number.isNaN(t)) return false;
+  results = results.filter((l) => {
+    const t = new Date(l.timestamp).getTime();
+    if (Number.isNaN(t)) return false;
 
-        if (startTime && t < startTime) return false;
-        if (endTime && t > endTime) return false;
+    if (startTime !== null && t < startTime) return false;
+    if (endTime !== null && t > endTime) return false;
 
-        return true;
-      });
-    }
+    return true;
+  });
+}
+
+
 
     /* -------- SORT NEWEST FIRST -------- */
     results.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));

@@ -1,5 +1,4 @@
 export default function LogItem({ log }) {
-  // Required by assessment: visual cues per level
   const levelColors = {
     error: "border-l-4 border-red-500 bg-red-50/10",
     warn: "border-l-4 border-yellow-500 bg-yellow-50/10",
@@ -7,32 +6,46 @@ export default function LogItem({ log }) {
     debug: "border-l-4 border-gray-500 bg-gray-50/10",
   };
 
-  // Badge + bar colors (for label + subtle highlight)
   const levelStyles = {
     error: {
       badge: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
     },
     warn: {
-      badge: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400",
+      badge:
+        "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400",
     },
     info: {
-      badge: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+      badge:
+        "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
     },
     debug: {
-      badge: "bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300",
+      badge:
+        "bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300",
     },
   };
 
   const colorClass = levelColors[log.level] || levelColors.debug;
-  const badgeClass =
-    (levelStyles[log.level] || levelStyles.debug).badge;
+  const badgeClass = (levelStyles[log.level] || levelStyles.debug).badge;
+
+  /* UTC → IST formatter */
+  function formatIST(utc) {
+    const d = new Date(utc);
+    return d.toLocaleString("en-IN", {
+      timeZone: "Asia/Kolkata",
+      year: "numeric",
+      month: "short",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true,
+    });
+  }
 
   return (
     <div
       className={`flex gap-3 p-4 rounded-md overflow-hidden transition hover:bg-slate-100 dark:hover:bg-slate-800 ${colorClass}`}
-
     >
-      {/* Content */}
       <div className="flex-1">
         {/* Top row */}
         <div className="flex items-center justify-between">
@@ -43,7 +56,7 @@ export default function LogItem({ log }) {
           </span>
 
           <time className="text-xs text-slate-500 dark:text-slate-400">
-            {new Date(log.timestamp).toLocaleString()}
+            {formatIST(log.timestamp)} IST
           </time>
         </div>
 
