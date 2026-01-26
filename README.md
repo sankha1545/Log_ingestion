@@ -673,6 +673,51 @@ curl "http://localhost:3001/logs?from=2026-01-24T00:00:00Z&to=2026-01-25T00:00:0
 - UI is connected to backend
 
 ---
+### 🔗 Connecting Your Own App to LogScope
+
+To send logs automatically from your **own app**, create a small helper file.
+
+### Step 6: Add Logger File to Your App
+
+Create a file :
+
+```
+// logscopeLogger.js
+export async function logToLogScope(level, message, resourceId, metadata = {}) {
+  try {
+    await fetch("http://localhost:3001/logs", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        level,
+        message,
+        resourceId,
+        timestamp: new Date().toISOString(),
+        traceId: "trace-" + Date.now(),
+        spanId: "span-" + Math.random().toString(36).slice(2),
+        commit: "v1.0",
+        metadata
+      })
+    });
+  } catch (err) {
+    console.error("LogScope not reachable", err);
+  }
+}
+
+```
+---
+### Step 7: Use It in Your App (Like console.log)
+
+```
+import { logToLogScope } from "./logscopeLogger.js";
+
+logToLogScope("info", "User logged in", "auth-service");
+logToLogScope("error", "DB connection failed", "db-service");
+
+```
+Now your application is **connected to LogScope 🎉**
+Every time this function runs, the log will appear live in the dashboard.
+---
 
 <a id="tech-stack"></a>
 ## 🧩 Tech Stack

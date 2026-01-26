@@ -122,5 +122,17 @@
     "metadata": {
       "memory": "92%"
     }
+  },
+  {
+    "level": "error",
+    "message": "Database connection failed",
+    "resourceId": "server-1",
+    "timestamp": "2026-01-24T12:29:34.466Z",
+    "traceId": "t-1001",
+    "spanId": "s-2001",
+    "commit": "main",
+    "metadata": {
+      "host": "prod"
+    }
   }
 ]
