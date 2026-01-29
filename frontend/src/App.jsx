@@ -5,7 +5,7 @@ import Sidebar from "./components/Sidebar";
 
 export default function App() {
   const [theme, setTheme] = useState("dark");
-  const [terminalOpen, setTerminalOpen] = useState(false);
+ 
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
@@ -50,12 +50,7 @@ export default function App() {
 
   {/* Right actions */}
   <div className="flex items-center gap-2 sm:gap-3">
-    <button
-      onClick={() => setTerminalOpen(true)}
-      className="px-2 py-1 text-xs text-white transition bg-indigo-600 rounded sm:px-3 sm:text-sm hover:bg-indigo-700"
-    >
-      Terminal
-    </button>
+    
 
     <button
       onClick={() => setTheme(theme === "dark" ? "light" : "dark")}

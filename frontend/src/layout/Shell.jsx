@@ -9,15 +9,10 @@ export default function Shell({ children }) {
     <div className="flex min-h-screen bg-slate-950 text-slate-100">
       <Sidebar />
 
-      <div className="flex-1 flex flex-col">
-        <header className="h-14 flex justify-between items-center px-4 bg-slate-900 border-b border-slate-800">
+      <div className="flex flex-col flex-1">
+        <header className="flex items-center justify-between px-4 border-b h-14 bg-slate-900 border-slate-800">
           <h1 className="font-bold">LogScope</h1>
-          <button
-            onClick={() => setOpen(true)}
-            className="bg-indigo-600 px-3 py-1 rounded text-sm"
-          >
-            Open Terminal
-          </button>
+        
         </header>
 
         <WebCLI open={open} onClose={() => setOpen(false)} />

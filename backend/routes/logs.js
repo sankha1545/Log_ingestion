@@ -10,7 +10,7 @@ const LogSchema = z.object({
   level: z.enum(["error", "warn", "info", "debug"]),
   message: z.string().min(1),
   resourceId: z.string().min(1),
-  timestamp: z.string().datetime(), // ISO 8601 UTC
+  timestamp: z.string().datetime(),
   traceId: z.string().min(1),
   spanId: z.string().min(1),
   commit: z.string().min(1),
@@ -30,11 +30,14 @@ const QuerySchema = z.object({
   caseSensitive: z.enum(["true", "false"]).optional(),
 });
 
-/* ----------- POST /logs (NDJSON) ----------- */
+/* ----------- POST /logs ----------- */
 async function postLogs(req, res) {
   const parsed = LogSchema.safeParse(req.body);
+
   if (!parsed.success) {
-    return res.status(400).json({ error: parsed.error.format() });
+    return res.status(400).json({
+      error: "Invalid log format",
+    });
   }
 
   const log = parsed.data;
@@ -46,16 +49,20 @@ async function postLogs(req, res) {
     if (req.io) req.io.emit("new_log", log);
     return res.status(201).json(log);
   } catch (err) {
+    console.error(err);
     return res.status(500).json({ error: "Failed to save log" });
   }
 }
 
-/* ----------- GET /logs (STREAMING) ----------- */
+/* ----------- GET /logs ----------- */
 async function getLogs(req, res) {
   try {
     const parsedQuery = QuerySchema.safeParse(req.query);
+
     if (!parsedQuery.success) {
-      return res.status(400).json({ error: parsedQuery.error.format() });
+      return res.status(400).json({
+        error: "Invalid query parameters",
+      });
     }
 
     const {
@@ -70,8 +77,16 @@ async function getLogs(req, res) {
       caseSensitive,
     } = parsedQuery.data;
 
-    if (from && to && new Date(from) > new Date(to)) {
-      return res.status(400).json({ error: "`from` cannot be after `to`" });
+    /* -------- Defensive Date Validation -------- */
+    if (from && to) {
+      const fromTime = new Date(from).getTime();
+      const toTime = new Date(to).getTime();
+
+      if (!Number.isNaN(fromTime) && !Number.isNaN(toTime) && fromTime > toTime) {
+        return res.status(400).json({
+          error: "From date should not be greater than To date",
+        });
+      }
     }
 
     if (!(await fs.pathExists(LOG_FILE))) {
@@ -87,16 +102,27 @@ async function getLogs(req, res) {
 
     for await (const line of rl) {
       if (!line.trim()) continue;
-      const log = JSON.parse(line);
+
+      let log;
+      try {
+        log = JSON.parse(line);
+      } catch {
+        continue; // skip corrupted line
+      }
 
       /* -------- FILTERS -------- */
+
       if (level) {
         const levels = level.split(",").map((s) => s.trim());
         if (!levels.includes(log.level)) continue;
       }
 
       if (resourceId) {
-        if (!log.resourceId.toLowerCase().includes(resourceId.toLowerCase()))
+        if (
+          !String(log.resourceId || "")
+            .toLowerCase()
+            .includes(resourceId.toLowerCase())
+        )
           continue;
       }
 
@@ -104,7 +130,7 @@ async function getLogs(req, res) {
         const safe = search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
         const flags = caseSensitive === "true" ? "" : "i";
         const regex = new RegExp(safe, flags);
-        if (!regex.test(log.message)) continue;
+        if (!regex.test(String(log.message || ""))) continue;
       }
 
       if (traceId && log.traceId !== traceId) continue;
@@ -122,6 +148,7 @@ async function getLogs(req, res) {
     results.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
     return res.json(results);
   } catch (err) {
+    console.error(err);
     return res.status(500).json({ error: "Failed to read logs" });
   }
 }

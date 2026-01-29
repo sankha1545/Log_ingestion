@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 
+/* ---------- Quick Presets ---------- */
 const QUICK = [
   { label: "15m", min: 15 },
   { label: "1h", min: 60 },
@@ -9,6 +10,7 @@ const QUICK = [
 ];
 
 export default function FilterBar({ filters, setFilters }) {
+  /* ---------- Local UI State ---------- */
   const [local, setLocal] = useState({
     search: filters.search || "",
     resourceId: filters.resourceId || "",
@@ -19,6 +21,11 @@ export default function FilterBar({ filters, setFilters }) {
   });
 
   const [activeQuick, setActiveQuick] = useState(null);
+
+  // NEW: validation error state
+  const [dateError, setDateError] = useState("");
+
+  /* ---------- Helpers ---------- */
 
   function isoToInput(iso) {
     const d = new Date(iso);
@@ -36,6 +43,20 @@ export default function FilterBar({ filters, setFilters }) {
     return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString();
   }
 
+  /* ---------- Core Validation Logic ---------- */
+  function validateDates(from, to) {
+    if (!from || !to) return true; // allow partial
+    const f = new Date(from);
+    const t = new Date(to);
+    if (f > t) {
+      setDateError("Error : From date should not be greater than To date");
+      return false;
+    }
+    setDateError("");
+    return true;
+  }
+
+  /* ---------- Quick Filters ---------- */
   function applyQuick(q) {
     setActiveQuick(q?.label || null);
 
@@ -54,7 +75,11 @@ export default function FilterBar({ filters, setFilters }) {
     });
   }
 
+  /* ---------- Main Effect (Apply Filters) ---------- */
   useEffect(() => {
+    const isValid = validateDates(local.fromLocal, local.toLocal);
+    if (!isValid) return; // 🚫 BLOCK API
+
     const out = {
       search: local.search || undefined,
       resourceId: local.resourceId || undefined,
@@ -63,10 +88,12 @@ export default function FilterBar({ filters, setFilters }) {
       to: local.toLocal ? toLocalISO(local.toLocal) : undefined,
       caseSensitive: local.caseSensitive || false,
     };
+
     setFilters(out);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [local]);
 
+  /* ---------- UI ---------- */
   return (
     <div className="space-y-3">
 
@@ -134,6 +161,13 @@ export default function FilterBar({ filters, setFilters }) {
           Clear
         </button>
       </div>
+
+      {/* Error Message */}
+      {dateError && (
+        <div className="px-3 py-2 text-sm text-red-600 bg-red-100 border border-red-300 rounded-lg">
+          ⚠️ {dateError}
+        </div>
+      )}
     </div>
   );
 }
