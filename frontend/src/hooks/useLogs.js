@@ -2,23 +2,19 @@ import { useEffect, useState, useRef, useMemo } from "react";
 import { fetchLogs } from "../api/logsApi";
 import { socket } from "../services/socket";
 
-/* ---------- Pure Filter Matcher (unchanged) ---------- */
+/* ---------- Pure Filter Matcher ---------- */
 function matchesFilters(log, filters = {}) {
-  console.log("FETCHING LOGS WITH:", filters);
-
   const logTime = new Date(log.timestamp).getTime();
   if (Number.isNaN(logTime)) return false;
 
-  // Level filter
-  if (filters.level && filters.level !== "" && log.level !== filters.level) return false;
+  if (filters.level && filters.level !== "" && log.level !== filters.level)
+    return false;
 
-  // ResourceId filter
   if (filters.resourceId && filters.resourceId !== "") {
     const r = String(filters.resourceId).toLowerCase();
     if (!String(log.resourceId || "").toLowerCase().includes(r)) return false;
   }
 
-  // Message search
   if (filters.search && filters.search !== "") {
     const pattern = String(filters.search).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     const flags = filters.caseSensitive ? "" : "i";
@@ -26,7 +22,6 @@ function matchesFilters(log, filters = {}) {
     if (!re.test(String(log.message || ""))) return false;
   }
 
-  // Time range
   if (filters.from) {
     const fromTime = new Date(filters.from).getTime();
     if (!Number.isNaN(fromTime) && logTime < fromTime) return false;
@@ -40,20 +35,15 @@ function matchesFilters(log, filters = {}) {
   return true;
 }
 
-/* ---------- Defensive Validation Layer ---------- */
+/* ---------- Defensive Validation ---------- */
 function validateFilters(filters = {}) {
   if (filters.from && filters.to) {
     const from = new Date(filters.from).getTime();
     const to = new Date(filters.to).getTime();
-
     if (!Number.isNaN(from) && !Number.isNaN(to) && from > to) {
-      return {
-        valid: false,
-        error: "From date should not be greater than To date",
-      };
+      return { valid: false, error: "From date should not be greater than To date" };
     }
   }
-
   return { valid: true, error: null };
 }
 
@@ -61,66 +51,46 @@ function validateFilters(filters = {}) {
 export function useLogs(filters = {}) {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null); // NEW
+  const [error, setError] = useState(null);
 
   const prevIds = useRef(new Set());
 
-  // stable key for debounce/effects
-  const filterKey = useMemo(() => JSON.stringify({ ...filters }), [filters]);
-
-  /* -------- REST FETCH (debounced) -------- */
+  /* -------- REST FETCH (ONLY WHEN FILTERS CHANGE) -------- */
   useEffect(() => {
     const controller = new AbortController();
-
-    // defensive validation
     const validation = validateFilters(filters);
+
     if (!validation.valid) {
       setError(validation.error);
-      return; // 🚫 BLOCK FETCH
+      return;
     }
 
     setError(null);
+    setLoading(true);
 
-    const debounce = setTimeout(() => {
-      setLoading(true);
+    fetchLogs(filters, controller.signal)
+      .then((data) => {
+        const sorted = (data || []).sort(
+          (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
+        );
 
-      fetchLogs(filters, controller.signal)
-        .then((data) => {
-          const filtered = data || [];
+        prevIds.current = new Set(
+          sorted.map((l) => `${l.timestamp}-${l.traceId}-${l.spanId}`)
+        );
 
+        setLogs(sorted); // initial snapshot
+      })
+      .catch(() => setError("Failed to fetch logs from server"))
+      .finally(() => setLoading(false));
 
-          const sorted = filtered.sort(
-            (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
-          );
+    return () => controller.abort();
+  }, [JSON.stringify(filters)]); // <-- stable dependency
 
-          prevIds.current = new Set(
-            sorted.map((l) => `${l.timestamp}-${l.traceId}-${l.spanId}`)
-          );
-
-          setLogs(sorted);
-        })
-        .catch((err) => {
-          console.error("fetchLogs failed:", err);
-          setError("Failed to fetch logs from server");
-        })
-        .finally(() => setLoading(false));
-    }, 300);
-
-    return () => {
-      controller.abort();
-      clearTimeout(debounce);
-    };
-  }, [filterKey]);
-
-  /* -------- REAL-TIME SOCKET -------- */
+  /* -------- SOCKET (INCREMENTAL ONLY) -------- */
   useEffect(() => {
-    const validation = validateFilters(filters);
-    if (!validation.valid) return; // don't stream invalid state
-
     const handler = (newLog) => {
       const key = `${newLog.timestamp}-${newLog.traceId}-${newLog.spanId}`;
       if (prevIds.current.has(key)) return;
-      if (!matchesFilters(newLog, filters)) return;
 
       prevIds.current.add(key);
       setLogs((prev) => [newLog, ...prev]);
@@ -128,7 +98,12 @@ export function useLogs(filters = {}) {
 
     socket.on("new_log", handler);
     return () => socket.off("new_log", handler);
-  }, [filterKey]);
+  }, []);
 
-  return { logs, loading, error };
+  /* -------- FILTER VIEW -------- */
+  const visibleLogs = useMemo(() => {
+    return logs.filter((l) => matchesFilters(l, filters));
+  }, [logs, filters]);
+
+  return { logs: visibleLogs, loading, error };
 }

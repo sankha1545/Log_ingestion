@@ -1,3 +1,5 @@
+// routes/logs.js
+
 const { z } = require("zod");
 const fs = require("fs-extra");
 const path = require("path");
@@ -5,7 +7,8 @@ const readline = require("readline");
 
 const LOG_FILE = path.join(__dirname, "../data/logs.ndjson");
 
-/* ----------- SCHEMA ----------- */
+/* ---------------- SCHEMAS ---------------- */
+
 const LogSchema = z.object({
   level: z.enum(["error", "warn", "info", "debug"]),
   message: z.string().min(1),
@@ -17,7 +20,6 @@ const LogSchema = z.object({
   metadata: z.record(z.any()),
 });
 
-/* ----------- QUERY SCHEMA ----------- */
 const QuerySchema = z.object({
   level: z.string().optional(),
   search: z.string().optional(),
@@ -30,14 +32,13 @@ const QuerySchema = z.object({
   caseSensitive: z.enum(["true", "false"]).optional(),
 });
 
-/* ----------- POST /logs ----------- */
+/* ---------------- POST /logs ---------------- */
+
 async function postLogs(req, res) {
   const parsed = LogSchema.safeParse(req.body);
 
   if (!parsed.success) {
-    return res.status(400).json({
-      error: "Invalid log format",
-    });
+    return res.status(400).json({ error: "Invalid log format" });
   }
 
   const log = parsed.data;
@@ -46,23 +47,28 @@ async function postLogs(req, res) {
     await fs.ensureFile(LOG_FILE);
     await fs.appendFile(LOG_FILE, JSON.stringify(log) + "\n");
 
-    if (req.io) req.io.emit("new_log", log);
+   
+   const io = req.app.get("io");
+if (io) {
+  io.emit("new_log", log);
+}
+
+
     return res.status(201).json(log);
   } catch (err) {
-    console.error(err);
+    console.error("POST /logs failed:", err);
     return res.status(500).json({ error: "Failed to save log" });
   }
 }
 
-/* ----------- GET /logs ----------- */
+/* ---------------- GET /logs ---------------- */
+
 async function getLogs(req, res) {
   try {
     const parsedQuery = QuerySchema.safeParse(req.query);
 
     if (!parsedQuery.success) {
-      return res.status(400).json({
-        error: "Invalid query parameters",
-      });
+      return res.status(400).json({ error: "Invalid query parameters" });
     }
 
     const {
@@ -77,15 +83,14 @@ async function getLogs(req, res) {
       caseSensitive,
     } = parsedQuery.data;
 
-    /* -------- Defensive Date Validation -------- */
+    // Defensive date validation
     if (from && to) {
       const fromTime = new Date(from).getTime();
       const toTime = new Date(to).getTime();
-
       if (!Number.isNaN(fromTime) && !Number.isNaN(toTime) && fromTime > toTime) {
-        return res.status(400).json({
-          error: "From date should not be greater than To date",
-        });
+        return res
+          .status(400)
+          .json({ error: "From date should not be greater than To date" });
       }
     }
 
@@ -107,11 +112,10 @@ async function getLogs(req, res) {
       try {
         log = JSON.parse(line);
       } catch {
-        continue; // skip corrupted line
+        continue;
       }
 
-      /* -------- FILTERS -------- */
-
+      // Filters
       if (level) {
         const levels = level.split(",").map((s) => s.trim());
         if (!levels.includes(log.level)) continue;
@@ -122,8 +126,9 @@ async function getLogs(req, res) {
           !String(log.resourceId || "")
             .toLowerCase()
             .includes(resourceId.toLowerCase())
-        )
+        ) {
           continue;
+        }
       }
 
       if (search) {
@@ -148,7 +153,7 @@ async function getLogs(req, res) {
     results.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
     return res.json(results);
   } catch (err) {
-    console.error(err);
+    console.error("GET /logs failed:", err);
     return res.status(500).json({ error: "Failed to read logs" });
   }
 }

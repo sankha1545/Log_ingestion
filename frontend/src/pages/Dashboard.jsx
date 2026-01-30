@@ -25,6 +25,12 @@ export default function Dashboard() {
     setPage(1);
   }, [filters]);
 
+  // 🔥 THIS IS THE MISSING PIECE
+  // reset page when logs change (socket / refresh)
+  useEffect(() => {
+    setPage(1);
+  }, [logs.length]);
+
   return (
     <div className="space-y-6">
       <header className="flex items-center justify-between">
@@ -38,10 +44,9 @@ export default function Dashboard() {
 
       <section className="p-4 bg-white border shadow dark:bg-slate-900 border-slate-300 dark:border-slate-800 rounded-xl">
         <FilterBar
-  filters={filters}
-  setFilters={(f) => setFilters({ ...f })}
-/>
-
+          filters={filters}
+          setFilters={(f) => setFilters({ ...f })}
+        />
       </section>
 
       <section className="overflow-hidden bg-white border shadow dark:bg-slate-900 border-slate-300 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100">

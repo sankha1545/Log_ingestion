@@ -6,39 +6,55 @@ const { Server } = require("socket.io");
 const app = express();
 app.disable("etag");
 
-const server = http.createServer(app);
-const { postLogs, getLogs } = require("./routes/logs");
+app.use(cors({
+  origin: [
+    "http://localhost",
+    "http://localhost:5173",
+  ],
+  methods: ["GET", "POST"],
+  credentials: true,
+}));
 
-// ------------------ SOCKET.IO ------------------
-const io = new Server(server, {
-  cors: {
-    origin: "*",
-    methods: ["GET", "POST"],
-  },
-});
-
-app.use((req, res, next) => {
-  req.io = io;
-  next();
-});
-
-app.use(cors());
 app.use(express.json());
 
+// Routes
+const { postLogs, getLogs } = require("./routes/logs");
 app.post("/logs", postLogs);
 app.get("/logs", getLogs);
 
-// ------------------ SOCKET CONNECTION ------------------
-io.on("connection", (socket) => {
-  console.log("🔌 Client connected:", socket.id);
-});
+// Only create server + socket when NOT testing
+let server;
+let io;
 
-// ------------------ ONLY LISTEN IF NOT TESTING ------------------
 if (process.env.NODE_ENV !== "test") {
+  server = http.createServer(app);
+
+  io = new Server(server, {
+    cors: {
+      origin: [
+        "http://localhost",
+        "http://localhost:5173",
+      ],
+      methods: ["GET", "POST"],
+    },
+    transports: ["websocket"],
+  });
+
+  // Make io available to routes
+  app.set("io", io);
+
+  io.on("connection", (socket) => {
+    console.log("🔌 Client connected:", socket.id);
+    socket.on("disconnect", () => {
+      console.log("❌ Client disconnected:", socket.id);
+    });
+  });
+
   const PORT = process.env.PORT || 3001;
-  server.listen(PORT, () => {
+  server.listen(PORT, "0.0.0.0", () => {
     console.log(`🚀 API + WebSocket running on port ${PORT}`);
   });
 }
 
-module.exports = server;
+// Export app for tests
+module.exports = app;

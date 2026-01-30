@@ -1,5 +1,6 @@
-const BASE_URL = import.meta.env.VITE_API_URL;
-console.log(import.meta.env.VITE_API_URL)
+
+
+const BASE_URL = "/api";
 
 /* ---------- Value Normalizer ---------- */
 function normalizeValue(key, value) {
@@ -21,7 +22,6 @@ async function handleResponse(res) {
     if (data?.error) message = data.error;
     else if (data?.message) message = data.message;
   } catch {
-    // fallback to status text
     message = res.statusText || message;
   }
 
@@ -52,13 +52,11 @@ export async function fetchLogs(filters = {}, signal) {
     const res = await fetch(url, { signal });
     return await handleResponse(res);
   } catch (err) {
-    // Abort = not a real error
     if (err.name === "AbortError") {
       console.warn("Request aborted");
       throw err;
     }
 
-    // Network or server error
     if (!err.status) {
       err.message = "Network error: Unable to reach server";
     }
